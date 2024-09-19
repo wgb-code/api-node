@@ -64,7 +64,11 @@ app.get('/users', async (req, res) => {
         users = await prisma.user.findMany()
     }
 
-    res.status(200).json(users)
+    if (users.length === 0) {
+        return res.status(404).json({ message: 'Não foi localizado usuários cadastrados com esses dados.' });
+    }
+
+    res.status(200).json(users);
 });
 
 app.put('/users/:id', async (req, res) => {

@@ -166,39 +166,79 @@ describe('API de Usuários', () => {
 
     it('Deve atualizar um usuário existente', async () => {
 
-        let createdUser = await prisma.user.create({
+        let user = await prisma.user.create({
             data: {
                 email: 'update@example.com',
                 name: 'Update User',
-                age: '20',
+                age: '40',
             },
         });
 
-        let updatedData = {
+        let updatedUser = {
             email: 'updated@example.com',
             name: 'Updated User',
-            age: '30',
+            age: '45',
         };
 
         let response = await request(app)
-            .put(`/users/${createdUser.id}`)
-            .send(updatedData);
+            .put(`/users/${user.id}`)
+            .send(updatedUser);
 
         expect(
             response.status
         ).toBe(201);
 
-        let updatedUser = await prisma.user.findUnique({
-            where: { id: createdUser.id },
+        expect(
+            response.body.message
+        ).toBe('Usuário atualizado com sucesso.');
+
+        let updatedUserFromDb = await prisma.user.findUnique({
+            where: { id: user.id },
         });
 
         expect(
-            updatedUser
+            updatedUserFromDb
         ).toBeTruthy();
 
         expect(
-            updatedUser
-        ).toMatchObject(updatedData);
+            updatedUserFromDb
+        ).toMatchObject(updatedUser);
 
-    }, 20000);
+    }, 10000);
+
+    it('Deve retornar erro ao tentar atualizar para um email já existente', async () => {
+
+        await prisma.user.create({
+            data: {
+                email: 'existing@example.com',
+                name: 'Existing User',
+                age: '50',
+            },
+        });
+
+        let userToUpdate = await prisma.user.create({
+            data: {
+                email: 'update@example.com',
+                name: 'Update User',
+                age: '40',
+            },
+        });
+
+        let updatedUser = {
+            email: 'existing@example.com',
+            name: 'Updated User',
+            age: '45',
+        };
+
+        let response = await request(app)
+            .put(`/users/${userToUpdate.id}`)
+            .send(updatedUser);
+
+        expect(response.status).toBe(400);
+
+        expect(
+            response.body.message
+        ).toBe('O email informado já está em uso.');
+
+    });
 });
