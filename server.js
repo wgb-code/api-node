@@ -43,7 +43,7 @@ app.post('/users', async (req, res) => {
             data: { email, name, age }
         });
 
-        res.status(201).json({ message: 'Usuário cadastrado com sucesso.' });
+        res.status(201).json({ message: 'Usuário cadastrado com sucesso.' })
     }
 })
 
@@ -69,31 +69,81 @@ app.get('/users', async (req, res) => {
 
 app.put('/users/:id', async (req, res) => {
 
-    await prisma.user.update({
-        where: {
-            id: req.params.id
-        },
-        data: {
-            email: req.body.email,
-            name: req.body.name,
-            age: req.body.age
-        }
-    })
+    let getID = req.params.id;
+    let { email, name, age } = req.body;
 
-    res.status(201).json({ message: 'Usuário atualizado com sucesso.' });
+    if (!getID) {
+        return res.status(400).json({ message: 'Por favor, informe um usuário válido.' });
+    }
+
+    if (!email || !name || !age) {
+        return res.status(400).json({ message: 'Por favor, preencha todos os campos.' });
+    }
+
+    try {
+
+        let getUser = await prisma.user.findUnique({
+            where: { id: getID }
+        });
+
+        if (!getUser) {
+            return res.status(404).json({ message: 'Usuário não encontrado.' });
+        }
+
+        if (email !== getUser.email) {
+
+            let checkEmailIsNotUse = await prisma.user.findUnique({
+                where: { email: email }
+            });
+
+            if (checkEmailIsNotUse) {
+                return res.status(400).json({ message: 'O email informado já está em uso.' });
+            }
+        }
+
+        await prisma.user.update({
+            where: { id: getID },
+            data: { email, name, age }
+        });
+
+        return res.status(201).json({ message: 'Usuário atualizado com sucesso.' });
+
+    } catch (error) {
+
+        if (error.code === 'P2002') {
+            return res.status(400).json({ message: 'O email informado já está em uso.' });
+        }
+
+        return res.status(500).json({ message: 'Não foi possível editar as informações, tente novamente.' });
+    }
 });
 
 app.delete('/users/:id', async (req, res) => {
 
     let getID = req.params.id;
 
-    await prisma.user.delete({
-        where: {
-            id: getID
-        }
-    })
+    if (!getID) {
+        return res.status(400).json({ message: 'Por favor, informar usuário válido.' });
+    }
 
-    res.status(200).json({message: "Usuário exclúido com sucesso."})
+    try {
+
+        await prisma.user.delete({
+            where: {
+                id: getID
+            }
+        });
+
+        return res.status(200).json({ message: "Usuário excluído com sucesso." });
+
+    } catch (error) {
+
+        if (error.code === 'P2025') {
+            return res.status(404).json({ message: 'Usuário não encontrado.' });
+        }
+
+        return res.status(500).json({ message: 'Não foi possível realizar a exclusão, tente novamente.' });
+    }
 });
 
 app.listen(3000);
