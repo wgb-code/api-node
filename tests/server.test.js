@@ -241,4 +241,15 @@ describe('API de Usuários', () => {
         ).toBe('O email informado já está em uso.');
 
     });
+
+    it('Deve retornar 404 quando nenhum usuário for encontrado', async () => {
+
+        let response = await request(app)
+            .get('/users')
+            .query({ email: 'notfound@example.com' });
+
+        expect(response.status).toBe(404);
+
+        expect(response.body.message).toBe('Não foi localizado usuários cadastrados com esses dados.');
+    }, 10000);
 });

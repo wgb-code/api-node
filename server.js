@@ -49,19 +49,29 @@ app.post('/users', async (req, res) => {
 
 app.get('/users', async (req, res) => {
 
-    let users = []
+    const filters = {};
 
-    if (req.query) {
+    if (req.query.email) {
+        filters.email = req.query.email;
+    }
+
+    if (req.query.name) {
+        filters.name = req.query.name;
+    }
+
+    if (req.query.age) {
+        filters.age = req.query.age;
+    }
+
+    let users = [];
+
+    if (Object.keys(filters).length > 0) {
         users = await prisma.user.findMany({
-            where: {
-                email: req.query.email,
-                name: req.query.name,
-                age: req.query.age
-            }
+            where: filters
         });
 
     } else {
-        users = await prisma.user.findMany()
+        users = await prisma.user.findMany();
     }
 
     if (users.length === 0) {
