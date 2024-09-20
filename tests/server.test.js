@@ -253,3 +253,113 @@ describe('API de Usuários', () => {
         expect(response.body.message).toBe('Não foi localizado usuários cadastrados com esses dados.');
     }, 10000);
 });
+
+describe('Validações', () => {
+
+    it('Deve retornar erro se o email for inválido', async () => {
+
+        let invalidUser = {
+            email: 'invalid-email',
+            name: 'Test User',
+            age: '30',
+        };
+
+        let response = await request(app)
+            .post('/users')
+            .send(invalidUser);
+
+        expect(response.status).toBe(400);
+
+        expect(
+            response.body.messages
+        ).toContain(
+            'O endereço de email deve ter entre 10 e 50 caracteres e estar no formato válido.'
+        );
+    });
+
+    it('Deve retornar erro se o nome tiver menos de 4 caracteres', async () => {
+
+        let invalidUser = {
+            email: 'test@example.com',
+            name: 'Tes',
+            age: '30',
+        };
+
+        let response = await request(app)
+            .post('/users')
+            .send(invalidUser);
+
+        expect(response.status).toBe(400);
+
+        expect(
+            response.body.messages
+        ).toContain('O nome deve ter entre 4 e 50 letras.');
+    });
+
+    it('Deve retornar erro se a idade não for fornecida', async () => {
+
+        let invalidUser = {
+            email: 'test@example.com',
+            name: 'Test User',
+            age: '',
+        };
+
+        let response = await request(app)
+            .post('/users')
+            .send(invalidUser);
+
+        expect(response.status).toBe(400);
+        expect(
+            response.body.messages
+        ).toContain('Por favor, insira a idade do usuário.');
+    });
+
+    it('Deve retornar erro se faltar o nome ao criar um usuário', async () => {
+
+        let invalidUser = {
+            email: 'test@example.com',
+            age: '25',
+        };
+
+        let response = await request(app)
+            .post('/users')
+            .send(invalidUser);
+
+        expect(response.status).toBe(400);
+        expect(
+            response.body.messages
+        ).toContain('Por favor, insira o nome do usuário');
+    });
+
+    it('Deve retornar erro se tentar atualizar um usuário com email já existente', async () => {
+
+        const existingUser = {
+            email: 'existing@example.com',
+            name: 'Existing User',
+            age: '30',
+        };
+
+        await prisma.user.create({ data: existingUser });
+
+        let userToUpdate = await prisma.user.create({
+            data: {
+                email: 'update@example.com',
+                name: 'Update User',
+                age: '40',
+            },
+        });
+
+        let response = await request(app)
+            .put(`/users/${userToUpdate.id}`)
+            .send({
+                email: 'existing@example.com',
+                name: 'Updated User',
+                age: '45',
+            });
+
+        expect(response.status).toBe(400);
+        expect(
+            response.body.message
+        ).toBe('O email informado já está em uso.');
+    });
+});
