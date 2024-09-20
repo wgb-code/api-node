@@ -60,6 +60,113 @@ Para rodar a API basta usar o comando `npm start`.
 
 Para rodar os testes será necessário derrubar o servidor da API, caso o mesmo esteja rodando, e após isto rodar o comando `npm start`.
 
-### Documentação do Projeto
+# Documentação do Projeto
 
+`Base URL`: **http://localhost:3000**
 
+`Content-Type`: **Requisições e Retornos em formato JSON**
+
+### ENDPOINTS
+
+### Criar Usuário:
+
+`POST /users`
+
+`Descrição`: **Cria um novo usuário na base de dados**
+
+`Corpo da requisição`:
+
+```
+{
+  "email": "string",
+  "name": "string",
+  "age": "integer"
+}
+```
+
+`Validações`:
+
+- **Email**: OBRIGATÓRIO, formato email, 10-50 caracteres
+- **Name**: OBRIGATÓRIO, entre 4 e 50 caracteres
+- **Age**: OBRIGATÓRIO, INTEGER
+
+`Respostas`:
+
+- 201 Created
+- 400 Bad Request
+
+### Listar Usuários:
+
+`GET /users`
+
+`Descrição`: **Lista todos os usuários ou usuários filtrados por name, email, age**
+
+`Query Params (OPCIONAL)`
+
+- email
+- name
+- age
+
+`Respostas`:
+
+- 201 Created
+- 400 Bad Request
+
+### Atualizar Usuário:
+
+`PUT /users/:id`
+
+`Descrição`: **Atualiza um usuário definido pelo ID**
+
+`Path Parametro`: **ID único de cada usuário, utilizado para atualizar o usuário**
+
+`Corpo da requisição`:
+
+```
+{
+  "email": "string",
+  "name": "string",
+  "age": "integer"
+}
+```
+
+`Validações`:
+
+- **Email**: OBRIGATÓRIO
+- **Name**: OBRIGATÓRIO
+- **Age**: OBRIGATÓRIO
+
+`Respostas`:
+
+- 201 Created
+- 400 Bad Request
+- 404 Not Found
+
+### Excluir Usuário:
+
+`DELETE /users/:id`
+
+`Descrição`: **Deleta um usuário definido pelo ID**
+
+`Path Parametro`: **ID único de cada usuário, utilizado para atualizar o usuário**
+
+`Corpo da requisição`:
+
+```
+{
+  "email": "string",
+  "name": "string",
+  "age": "integer"
+}
+```
+
+`Respostas`:
+
+- 200 OK
+- 404 Not Found
+
+## DEMAIS ERROS:
+
+- 500 Internal Server Error
+- P2002 Erro de CONSTRAINT UNIQUE
+- P2025 Erro ao deletar usuário inválido
