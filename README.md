@@ -170,3 +170,6 @@ Para rodar os testes será necessário derrubar o servidor da API, caso o mesmo 
 - 500 Internal Server Error
 - P2002 Erro de CONSTRAINT UNIQUE
 - P2025 Erro ao deletar usuário inválido
+
+## Terminal após switch de testes serem executadas
+![Texto alternativo](/assets/switch_testes.png)
